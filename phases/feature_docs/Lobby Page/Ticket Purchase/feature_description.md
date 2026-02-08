@@ -14,7 +14,7 @@ This document outlines the user flow for confirming their selected numbers and i
 ## User Interaction
 *   After selecting 9 unique numbers via the "your NUMBERS" interface (described in Game Selection), the "PLAY" button becomes active.
 *   Users tap the "PLAY" button to confirm their numbers and join the game.
-*   Upon successful initiation, users should transition to the Bingo game screen.
+*   Upon successful initiation by all the users, they should transition to the Bingo game screen.
 
 ## Mobile Considerations
 *   The "PLAY" button should be clearly visible and easily tappable.

@@ -16,12 +16,9 @@ This document describes the display and interaction with the user's Bingo card(s
 
 ## User Interaction
 *   Users can manually tap to mark numbers on their card as they are called.
-*   (If auto-daub is a feature) Users can toggle automatic marking of called numbers.
-*   Users can easily switch between multiple cards they are playing.
 *   Visual feedback when a number is successfully marked, with user-specific highlight colors.
 
 ## Mobile Considerations
 *   Card must be large enough for easy tapping/marking of individual numbers.
-*   Pinch-to-zoom or scrolling for multiple cards if necessary.
 *   Clear contrast between marked and unmarked numbers, and between different highlight states.
 *   Performance optimization to ensure smooth updates as numbers are called.

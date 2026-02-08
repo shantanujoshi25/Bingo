@@ -10,14 +10,11 @@ This document describes the "Claim Bingo" button, its visibility, and interactio
 *   **Visibility State:**
     *   The button should be inactive/greyed out when no Bingo is possible.
     *   It should become active/highlighted when a winning pattern is detected on one or more of the user's cards.
-*   **Confirmation Dialog (optional):**
-    *   After tapping, a quick confirmation (e.g., "Are you sure you want to claim?") to prevent accidental claims.
 
 ## User Interaction
 *   Users tap the button to declare a Bingo.
-*   The button should only be active when a valid Bingo pattern is present on a card.
 *   Upon successful claim, appropriate feedback (e.g., "Bingo Claimed!", sound effect) and transition to a results screen.
-*   If the claim is invalid, clear feedback is provided (e.g., "No Bingo!").
+*   If the claim is invalid, clear feedback is provided (e.g., "Wrong claim") and the player will be kicked out of the game.
 
 ## Mobile Considerations
 *   Large and easily tappable, usually located at the bottom or a prominent side of the screen.
