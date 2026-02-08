@@ -5,7 +5,7 @@ This document describes the in-game chat functionality for players on the mobile
 
 ## Visual Elements
 *   **Chat Window/Overlay:**
-    *   A collapsible or scrollable chat area, usually at the bottom or side of the screen.
+    *   A collapsible or scrollable chat area, usually at the bottom or side of the screen, with a dark grey background.
     *   Displays messages from other players and system notifications.
 *   **Message Input Field:**
     *   A text input field for users to type their messages.

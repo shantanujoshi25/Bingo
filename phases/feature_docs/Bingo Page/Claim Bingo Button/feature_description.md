@@ -5,7 +5,7 @@ This document describes the "Claim Bingo" button, its visibility, and interactio
 
 ## Visual Elements
 *   **Button Appearance:**
-    *   A prominent, clearly labeled button (e.g., "BINGO!", "Claim").
+    *   A prominent, clearly labeled button: "BINGO!".
     *   Often brightly colored or animated to draw attention when a Bingo is possible.
 *   **Visibility State:**
     *   The button should be inactive/greyed out when no Bingo is possible.

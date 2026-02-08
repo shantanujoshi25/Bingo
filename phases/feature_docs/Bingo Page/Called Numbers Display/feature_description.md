@@ -1,15 +1,13 @@
 # Called Numbers Display (Mobile Screen View)
 
 ## Feature Description
-This document describes how the numbers called during a Bingo game are displayed to the user on a mobile device.
+This document describes how the numbers called during a Bingo game are displayed to the user on a mobile device, specifically showing the most recently called number and previous numbers.
 
 ## Visual Elements
 *   **Current Called Number:**
-    *   Prominent, large display of the most recently called Bingo number.
-    *   Often accompanied by its letter (e.g., "B-7", "I-20").
+    *   Prominent, large display of the MOST recently called Bingo number.
 *   **History of Called Numbers:**
-    *   A list or scrolling display of previously called numbers in the current round.
-    *   Perhaps grouped by letter (B, I, N, G, O).
+    *   A list or scrolling display of previous numbers called in the current round.
 *   **Visual/Auditory Cues:**
     *   Animation or sound effect when a new number is called.
 

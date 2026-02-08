@@ -1,26 +1,22 @@
 # Ticket Purchase (Mobile Screen View)
 
 ## Feature Description
-This document outlines the user flow for purchasing Bingo tickets within the Lobby Page on a mobile device.
+This document outlines the user flow for confirming their selected numbers and initiating a Bingo game from the Lobby Page on a mobile device. This process follows the "your NUMBERS" selection detailed in the Game Selection feature.
 
 ## Visual Elements
-*   **Ticket Selection Interface:**
-    *   Options to select the number of tickets (e.g., quantity selector, pre-set bundles).
-    *   Display of total cost and currency.
-    *   (Optional) Preview of selected tickets/card numbers before purchase.
-*   **Confirmation Dialog/Screen:**
-    *   Summary of the purchase (game, number of tickets, total cost).
-    *   "Confirm Purchase" and "Cancel" buttons.
-*   **Payment Method Selection (if applicable):**
-    *   Options to use in-app wallet balance or external payment gateways.
+*   **Confirmation of Selected Numbers:**
+    *   (Implicitly handled by the "your NUMBERS" selection in Game Selection).
+*   **PLAY Button:**
+    *   A prominent "PLAY" button that, once tapped, finalizes the ticket (selected numbers) and starts the game. This button is actionable only after 9 unique numbers have been selected.
+*   **Cost Display:**
+    *   Display of the cost to play the game (e.g., 1000 coins per player as shown in the lobby image).
 
 ## User Interaction
-*   Users can easily choose how many tickets they want to buy for a selected game.
-*   The total cost should update dynamically based on ticket quantity.
-*   Confirmation is required before finalizing the purchase.
-*   Upon successful purchase, users should see a confirmation message and potentially an option to go directly to the game.
+*   After selecting 9 unique numbers via the "your NUMBERS" interface (described in Game Selection), the "PLAY" button becomes active.
+*   Users tap the "PLAY" button to confirm their numbers and join the game.
+*   Upon successful initiation, users should transition to the Bingo game screen.
 
 ## Mobile Considerations
-*   Streamlined, multi-step process if necessary, to avoid clutter.
-*   Large, tappable buttons for quantity selection and confirmation.
-*   Clear display of price and current wallet balance.
+*   The "PLAY" button should be clearly visible and easily tappable.
+*   Clear indication of when the "PLAY" button is active/inactive.
+*   Smooth transition between the Lobby and Bingo game screens.
