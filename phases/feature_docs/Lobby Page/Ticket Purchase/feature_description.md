@@ -9,7 +9,7 @@ This document outlines the user flow for confirming their selected numbers and i
 *   **PLAY Button:**
     *   A prominent "PLAY" button that, once tapped, finalizes the ticket (selected numbers) and starts the game. This button is actionable only after 9 unique numbers have been selected.
 *   **Cost Display:**
-    *   Display of the cost to play the game (e.g., 1 USDC coin per player as shown in the lobby image).
+    *   Display of the cost to play the game (e.g., 1000 coin per player as shown in the lobby image).
 
 ## User Interaction
 *   After selecting 9 unique numbers via the "NUMBERS" interface (described in Game Selection), the "PLAY" button becomes active.
