@@ -1,7 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List
+from pathlib import Path
 import os
 import json
 from dotenv import load_dotenv
@@ -21,10 +24,12 @@ load_dotenv()
 
 app = FastAPI()
 
+# Serve frontend static files in production
+STATIC_DIR = Path(__file__).parent.parent / "frontend" / "dist"
+
 # CORS Middleware
-origins = [
-    os.getenv("ALLOWED_ORIGINS", "http://localhost:5173"),
-]
+allowed = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+origins = [o.strip() for o in allowed.split(",")]
 
 app.add_middleware(
     CORSMiddleware,
@@ -125,6 +130,19 @@ async def payment_webhook(request: Request):
         await redis.hincrby(f"lobby:{lobby_id}", "pot", amount)
 
     return {"success": True}
+
+
+# --- Serve frontend static files (production) ---
+if STATIC_DIR.is_dir():
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Serve the SPA for any non-API route."""
+        file_path = STATIC_DIR / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(STATIC_DIR / "index.html")
 
 
 if __name__ == "__main__":
