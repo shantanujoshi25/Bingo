@@ -2,17 +2,13 @@
 
 ## Feature Description
 This document describes the display and interaction with the user's Bingo card(s) during an active game on a mobile device. The bingo card features a 3x3 grid.
+This will be in the top half of the page.
 
 ## Visual Elements
 *   **Bingo Card Grid:**
     *   Clear, legible display of numbers in a 3x3 grid format.
-    *   There is an overlay feature for marked numbers.
     *   Users can highlight numbers in 'amethyst', with the original highlight color being 'gold'.
-*   **Marked Numbers:**
-    *   Numbers that have been called should be clearly marked/daubed on the card, with an overlay indicating selection.
-    *   Different visual states for manually marked vs. auto-marked numbers (if auto-daub is a feature).
-*   **Game Information Overlay:**
-    *   Small display of game ID, time remaining, current prize.
+    *   The background is black, and the letters are white.
 
 ## User Interaction
 *   Users can manually tap to mark numbers on their card as they are called.
