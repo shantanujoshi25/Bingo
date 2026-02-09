@@ -8,6 +8,7 @@ This will be in the top half of the page.
 *   **Bingo Card Grid:**
     *   Clear, legible display of numbers in a 3x3 grid format.
     *   Users can highlight numbers in 'amethyst', with the original highlight color being 'gold'.
+    *   The background is black, and the letters are white.
 
 ## User Interaction
 *   Users can manually tap to mark numbers on their card as they are called.
