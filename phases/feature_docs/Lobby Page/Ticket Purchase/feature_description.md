@@ -1,22 +1,21 @@
 # Ticket Purchase (Mobile Screen View)
 
 ## Feature Description
-This document outlines the user flow for confirming their selected numbers and initiating a Bingo game from the Lobby Page on a mobile device. This process follows the "NUMBERS" selection detailed in the Game Selection feature.
-
+This document outlines the user flow for confirming their selected numbers and initiating a Bingo game from the Lobby Page on a mobile device.
 ## Visual Elements
 *   **Confirmation of Selected Numbers:**
-    *   (Implicitly handled by the "NUMBERS" selection in Game Selection).
+    *   There are nine circular slots in a 3 by 3 grid.
+    *   Each slot is blank when the player comes to the screen for the first time
+    *   Each slot can be rolled from 1 to 50. This is similar to how a user inputs their birth date in any app. They scroll to find the right number. Here the user can scroll from 1 to 50. 
 *   **PLAY Button:**
     *   A prominent "PLAY" button that, once tapped, finalizes the ticket (selected numbers) and starts the game. This button is actionable only after 9 unique numbers have been selected.
-*   **Cost Display:**
-    *   Display of the cost to play the game (e.g., 1000 coin per player as shown in the lobby image).
-
+  
 ## User Interaction
-*   After selecting 9 unique numbers via the "NUMBERS" interface (described in Game Selection), the "PLAY" button becomes active.
-*   Users tap the "PLAY" button to confirm their numbers and join the game.
-*   Upon successful initiation by all the users, the players transition to the Bingo game screen.
+*   After selecting 9 unique numbers, the "PLAY" button becomes active.
+*   Users tap the "PLAY" button to confirm their numbers and transition to the Bingo game screen.
 
 ## Mobile Considerations
 *   The "PLAY" button should be clearly visible and easily tappable.
 *   Clear indication of when the "PLAY" button is active/inactive.
 *   Smooth transition between the Lobby and Bingo game screens.
+*   Play buttom is at the bottom of the screen.
