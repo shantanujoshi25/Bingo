@@ -10,6 +10,7 @@ load_dotenv()
 ALIEN_SSO_URL = "https://sso.alien-api.com/oauth/jwks"
 AUDIENCE = os.getenv("ALIEN_PROVIDER_ADDRESS")
 ISSUER = "https://sso.alien-api.com"
+DEV_MODE = os.getenv("DEV_MODE", "true").lower() == "true"
 
 async def get_jwks():
     async with httpx.AsyncClient() as client:
@@ -20,9 +21,13 @@ async def get_jwks():
 async def verify_alien_token(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid auth header")
-    
+
     token = authorization.split(" ")[1]
-    
+
+    # Dev mode: accept any token, extract alien_id from body later
+    if DEV_MODE:
+        return token  # Return the token itself as the identity
+
     try:
         jwks = await get_jwks()
         unverified_header = jwt.get_unverified_header(token)
@@ -45,7 +50,7 @@ async def verify_alien_token(authorization: str = Header(...)):
                 issuer=ISSUER
             )
             return payload.get("sub")  # alien_id
-        
+
         raise HTTPException(status_code=401, detail="Unable to find appropriate key")
 
     except jwt.ExpiredSignatureError:
