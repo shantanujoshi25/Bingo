@@ -13,4 +13,4 @@ This document describes the "Claim Bingo" button, its visibility, and interactio
 *   If the claim is invalid, show "Wrong Claim" in the bingo button
 
 ## Mobile Considerations
-*   Large and easily tappable, located just below the user chosen numbers
+*   Large and easily tappable, located just below the user-chosen numbers "NUMBERS" ticket
