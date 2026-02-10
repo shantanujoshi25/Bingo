@@ -193,7 +193,7 @@ export default function GameFlow() {
         <div className="flex flex-col items-center min-h-[100dvh] px-4 pt-3 pb-6">
           {/* Title */}
           <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent mb-2">
-            Fair Bingo
+            Bingo with Aliens
           </h1>
 
           {/* Jackpot banner */}

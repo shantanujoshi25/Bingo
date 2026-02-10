@@ -153,7 +153,7 @@ export default function Lobby({
 
       {/* Title */}
       <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent mb-1">
-        Fair Bingo
+        Bingo with Aliens
       </h1>
       <p className="text-gray-500 text-xs mb-2">
         Buy-in: {BUY_IN_AMOUNT.toLocaleString()} coins
