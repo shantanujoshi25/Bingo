@@ -12,15 +12,16 @@ import ClaimButton from './ClaimButton';
 import GameChat from './GameChat';
 import WinnerScreen from './WinnerScreen';
 import KickedScreen from './KickedScreen';
+import Welcome from './Welcome';
 
-type Phase = 'browsing' | 'lobby' | 'playing';
+type Phase = 'welcome' | 'browsing' | 'lobby' | 'playing';
 type Overlay = 'won' | 'kicked' | 'finished' | null;
 
 export default function GameFlow() {
   const { authToken, alienId, isReady } = useAuth();
 
   const [lobbyId, setLobbyId] = useState<string | null>(null);
-  const [phase, setPhase] = useState<Phase>('browsing');
+  const [phase, setPhase] = useState<Phase>('welcome');
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [playerGrid, setPlayerGrid] = useState<number[][]>([]);
   const [markedNumbers, setMarkedNumbers] = useState<Set<number>>(new Set());
@@ -159,6 +160,11 @@ export default function GameFlow() {
             x
           </button>
         </div>
+      )}
+
+      {/* WELCOME phase */}
+      {phase === 'welcome' && (
+        <Welcome onPlay={() => setPhase('browsing')} />
       )}
 
       {/* BROWSING phase — lobby listing */}
