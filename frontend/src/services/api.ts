@@ -1,5 +1,5 @@
 import { API_URL } from '../config';
-import type { GameStatus, JoinLobbyResponse, ClaimResult } from '../types';
+import type { GameStatus, JoinLobbyResponse, ClaimResult, LobbyInfo } from '../types';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
@@ -22,11 +22,32 @@ function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
 
+export async function listLobbies(
+  token: string
+): Promise<{ lobbies: LobbyInfo[] }> {
+  return request('/api/lobbies', {
+    headers: authHeaders(token),
+  });
+}
+
 export async function joinLobby(
   token: string,
-  alienId: string
+  alienId: string,
+  lobbyId: string
 ): Promise<JoinLobbyResponse> {
   return request('/api/game/join', {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ alien_id: alienId, lobby_id: lobbyId }),
+  });
+}
+
+export async function leaveLobby(
+  token: string,
+  lobbyId: string,
+  alienId: string
+): Promise<{ success: boolean }> {
+  return request(`/api/game/${lobbyId}/leave`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ alien_id: alienId }),

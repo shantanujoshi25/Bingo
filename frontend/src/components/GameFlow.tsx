@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useGameState } from '../hooks/useGameState';
-import { joinLobby, submitGrid, claimBingo } from '../services/api';
+import { useLobbies } from '../hooks/useLobbies';
+import { joinLobby, leaveLobby, submitGrid, claimBingo } from '../services/api';
 import LoadingSpinner from './LoadingSpinner';
+import LobbyList from './LobbyList';
 import Lobby from './Lobby';
 import BingoCard from './BingoCard';
 import NumberDisplay from './NumberDisplay';
@@ -11,14 +13,14 @@ import GameChat from './GameChat';
 import WinnerScreen from './WinnerScreen';
 import KickedScreen from './KickedScreen';
 
-type Phase = 'lobby' | 'playing';
+type Phase = 'browsing' | 'lobby' | 'playing';
 type Overlay = 'won' | 'kicked' | 'finished' | null;
 
 export default function GameFlow() {
   const { authToken, alienId, isReady } = useAuth();
 
   const [lobbyId, setLobbyId] = useState<string | null>(null);
-  const [phase, setPhase] = useState<Phase>('lobby');
+  const [phase, setPhase] = useState<Phase>('browsing');
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [playerGrid, setPlayerGrid] = useState<number[][]>([]);
   const [markedNumbers, setMarkedNumbers] = useState<Set<number>>(new Set());
@@ -28,6 +30,7 @@ export default function GameFlow() {
   const [error, setError] = useState<string | null>(null);
 
   const { gameState } = useGameState(lobbyId, authToken);
+  const { lobbies } = useLobbies(authToken, phase === 'browsing');
 
   // Sync phase from server state
   const syncPhaseFromServer = useCallback(() => {
@@ -44,18 +47,32 @@ export default function GameFlow() {
     syncPhaseFromServer();
   }
 
-  const handleJoin = async () => {
+  const handleSelectLobby = async (selectedLobbyId: string) => {
     if (!authToken || !alienId) return;
     setIsLoading(true);
     setError(null);
     try {
-      const result = await joinLobby(authToken, alienId);
+      const result = await joinLobby(authToken, alienId, selectedLobbyId);
       setLobbyId(result.lobby_id);
+      setPhase('lobby');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join lobby');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLeaveLobby = async () => {
+    if (!authToken || !alienId || !lobbyId) return;
+    try {
+      await leaveLobby(authToken, lobbyId, alienId);
+    } catch {
+      // Ignore errors — we're leaving anyway
+    }
+    setLobbyId(null);
+    setPhase('browsing');
+    setHasSubmitted(false);
+    setError(null);
   };
 
   const handleSubmitGrid = async (grid: number[][]) => {
@@ -116,7 +133,7 @@ export default function GameFlow() {
 
   const handlePlayAgain = () => {
     setLobbyId(null);
-    setPhase('lobby');
+    setPhase('browsing');
     setOverlay(null);
     setPlayerGrid([]);
     setMarkedNumbers(new Set());
@@ -144,13 +161,21 @@ export default function GameFlow() {
         </div>
       )}
 
+      {/* BROWSING phase — lobby listing */}
+      {phase === 'browsing' && (
+        <LobbyList
+          lobbies={lobbies}
+          onSelectLobby={handleSelectLobby}
+          isJoining={isLoading}
+        />
+      )}
+
       {/* LOBBY phase */}
       {phase === 'lobby' && (
         <Lobby
           gameState={gameState}
-          onJoin={handleJoin}
           onSubmitGrid={handleSubmitGrid}
-          isJoining={isLoading && !hasSubmitted}
+          onBack={handleLeaveLobby}
           isSubmitting={isLoading}
           hasSubmitted={hasSubmitted}
           alienId={alienId}
