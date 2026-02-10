@@ -15,36 +15,43 @@ FORMING_TIMEOUT = 120  # 2 minutes
 NUMBER_CALL_INTERVAL = 3  # 3 seconds
 LOBBY_TTL = 600  # 10 minutes
 MAX_NUMBER = 20
-GLOBAL_LOBBY_KEY = "global_lobby"
-BUY_IN_AMOUNT = 3500  # Fixed buy-in for single lobby
+BUY_IN_AMOUNT = 3500  # Fixed buy-in per player
+
+ACTIVE_LOBBIES_KEY = "active_lobbies"
+
+CELESTIAL_NAMES = [
+    "Andromeda", "Orion", "Nebula", "Pulsar", "Quasar", "Vega", "Sirius",
+    "Polaris", "Centauri", "Nova", "Eclipse", "Cosmos", "Zenith", "Astral",
+    "Lyra", "Cygnus", "Draco", "Perseus", "Cassiopeia", "Arcturus",
+    "Rigel", "Betelgeuse", "Aldebaran", "Antares", "Capella", "Deneb",
+    "Procyon", "Spica", "Regulus", "Altair",
+]
 
 
-# --- Single Global Lobby ---
+# --- Multi-Lobby Management ---
 
-async def get_or_create_global_lobby() -> dict:
-    """Get the current global lobby or create a new one.
-    Returns dict with lobby_id and whether game is in_progress."""
-    lobby_id = await redis.get(GLOBAL_LOBBY_KEY)
-
-    if lobby_id:
-        lobby = await redis.hgetall(f"lobby:{lobby_id}")
-        if lobby:
-            status = lobby.get("status", "")
-            if status == "active":
-                return {"lobby_id": lobby_id, "in_progress": True}
-            elif status == "forming":
-                return {"lobby_id": lobby_id, "in_progress": False}
-            # finished — fall through to create new
-
-    return await _create_new_global_lobby()
+async def _pick_lobby_name() -> str:
+    """Pick a celestial name not currently used by any active lobby."""
+    active_ids = await redis.smembers(ACTIVE_LOBBIES_KEY)
+    used_names = set()
+    for lid in active_ids:
+        name = await redis.hget(f"lobby:{lid}", "name")
+        if name:
+            used_names.add(name)
+    for name in CELESTIAL_NAMES:
+        if name not in used_names:
+            return name
+    return f"Cosmos-{random.randint(100, 999)}"
 
 
-async def _create_new_global_lobby() -> dict:
-    """Create a fresh global lobby."""
+async def create_lobby() -> dict:
+    """Create a new forming lobby with a celestial name."""
     lobby_id = f"lobby_{uuid.uuid4().hex[:8]}"
+    name = await _pick_lobby_name()
 
     await redis.hset(f"lobby:{lobby_id}", mapping={
         "lobby_id": lobby_id,
+        "name": name,
         "status": "forming",
         "buy_in_amount": str(BUY_IN_AMOUNT),
         "pot": "0",
@@ -55,9 +62,62 @@ async def _create_new_global_lobby() -> dict:
         "finished_at": "",
     })
     await redis.expire(f"lobby:{lobby_id}", LOBBY_TTL)
-    await redis.set(GLOBAL_LOBBY_KEY, lobby_id, ex=LOBBY_TTL)
+    await redis.sadd(ACTIVE_LOBBIES_KEY, lobby_id)
+    return {"lobby_id": lobby_id, "name": name, "status": "forming", "player_count": 0, "pot": 0}
 
-    return {"lobby_id": lobby_id, "in_progress": False}
+
+async def ensure_empty_lobby_exists() -> None:
+    """Ensure exactly one empty forming lobby exists. Remove extras."""
+    active_ids = await redis.smembers(ACTIVE_LOBBIES_KEY)
+    empty_lobbies = []
+
+    for lid in active_ids:
+        lobby = await redis.hgetall(f"lobby:{lid}")
+        if not lobby or lobby.get("status") == "finished":
+            await redis.srem(ACTIVE_LOBBIES_KEY, lid)
+            continue
+        if lobby.get("status") == "forming":
+            player_keys = await redis.keys(f"lobby:{lid}:player:*")
+            if len(player_keys) == 0:
+                empty_lobbies.append(lid)
+
+    if len(empty_lobbies) == 0:
+        await create_lobby()
+    elif len(empty_lobbies) > 1:
+        # Keep the first, remove the rest
+        for lid in empty_lobbies[1:]:
+            await redis.delete(f"lobby:{lid}")
+            await redis.srem(ACTIVE_LOBBIES_KEY, lid)
+
+
+async def list_lobbies() -> list:
+    """Return all active lobbies (forming/active) with summary info."""
+    active_ids = await redis.smembers(ACTIVE_LOBBIES_KEY)
+    lobbies = []
+    for lid in active_ids:
+        lobby = await redis.hgetall(f"lobby:{lid}")
+        if not lobby:
+            await redis.srem(ACTIVE_LOBBIES_KEY, lid)
+            continue
+        if lobby["status"] == "finished":
+            await redis.srem(ACTIVE_LOBBIES_KEY, lid)
+            continue
+        player_keys = await redis.keys(f"lobby:{lid}:player:*")
+        lobbies.append({
+            "lobby_id": lobby["lobby_id"],
+            "name": lobby.get("name", "Unknown"),
+            "status": lobby["status"],
+            "player_count": len(player_keys),
+            "max_players": MAX_PLAYERS,
+            "pot": int(lobby.get("pot", 0)),
+            "buy_in_amount": int(lobby.get("buy_in_amount", BUY_IN_AMOUNT)),
+        })
+    return lobbies
+
+
+async def initialize_lobbies() -> None:
+    """Called on app startup to ensure at least one empty lobby exists."""
+    await ensure_empty_lobby_exists()
 
 
 # --- Player Joining ---
@@ -111,12 +171,45 @@ async def add_player_to_lobby(lobby_id: str, alien_id: str) -> dict:
         await redis.hset(f"lobby:{lobby_id}", "forming_deadline", deadline)
         asyncio.create_task(forming_timer(lobby_id))
 
+    # Ensure a new empty lobby is available after this join
+    await ensure_empty_lobby_exists()
+
     return {
         "lobby_id": lobby_id,
         "status": lobby["status"],
         "player_count": player_count,
         "pot": pot,
     }
+
+
+async def remove_player_from_lobby(lobby_id: str, alien_id: str) -> dict:
+    """Remove a player from a forming lobby and refund buy-in."""
+    lobby = await redis.hgetall(f"lobby:{lobby_id}")
+    if not lobby:
+        raise ValueError("Lobby not found")
+
+    if lobby["status"] != "forming":
+        raise ValueError("Cannot leave a game in progress")
+
+    exists = await redis.exists(f"lobby:{lobby_id}:player:{alien_id}")
+    if not exists:
+        raise ValueError("Player not in this lobby")
+
+    # Remove player
+    await redis.delete(f"lobby:{lobby_id}:player:{alien_id}")
+
+    # Refund buy-in
+    await redis.hincrby(f"lobby:{lobby_id}", "pot", -BUY_IN_AMOUNT)
+
+    # If lobby is now empty, clean up extra empties
+    player_keys = await redis.keys(f"lobby:{lobby_id}:player:*")
+    if len(player_keys) == 0:
+        # Reset forming deadline since no players left
+        await redis.hset(f"lobby:{lobby_id}", "forming_deadline", "")
+
+    await ensure_empty_lobby_exists()
+
+    return {"success": True}
 
 
 # --- Submit Grid (combined select + arrange) ---
@@ -367,8 +460,9 @@ async def finish_game(lobby_id: str, winner: Optional[str]):
         "winner": winner or "",
         "finished_at": datetime.utcnow().isoformat(),
     })
-    # Clear global lobby pointer so next join creates a fresh lobby
-    await redis.delete(GLOBAL_LOBBY_KEY)
+    # Remove from active set and ensure an empty lobby exists
+    await redis.srem(ACTIVE_LOBBIES_KEY, lobby_id)
+    await ensure_empty_lobby_exists()
 
 
 # --- Game Status ---

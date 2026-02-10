@@ -13,8 +13,10 @@ from datetime import datetime
 from redis_client import redis, check_redis_connection
 from auth import verify_alien_token
 from lobby import (
-    get_or_create_global_lobby,
+    list_lobbies,
+    initialize_lobbies,
     add_player_to_lobby,
+    remove_player_from_lobby,
     submit_grid as lobby_submit_grid,
     get_game_status as lobby_get_game_status,
     verify_claim,
@@ -23,6 +25,12 @@ from lobby import (
 load_dotenv()
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def startup():
+    await initialize_lobbies()
+
 
 # Serve frontend static files in production
 STATIC_DIR = Path(__file__).parent.parent / "frontend" / "dist"
@@ -41,6 +49,10 @@ app.add_middleware(
 
 # --- Pydantic Models ---
 class JoinLobbyRequest(BaseModel):
+    alien_id: str
+    lobby_id: str
+
+class LeaveLobbyRequest(BaseModel):
     alien_id: str
 
 class SubmitGridRequest(BaseModel):
@@ -63,20 +75,25 @@ async def health_check():
     }
 
 
+@app.get("/api/lobbies")
+async def get_lobbies(alien_id: str = Depends(verify_alien_token)):
+    lobbies = await list_lobbies()
+    return {"lobbies": lobbies}
+
+
 @app.post("/api/game/join")
 async def join_lobby(request: JoinLobbyRequest, alien_id: str = Depends(verify_alien_token)):
     try:
-        lobby_info = await get_or_create_global_lobby()
+        result = await add_player_to_lobby(request.lobby_id, request.alien_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-        if lobby_info["in_progress"]:
-            return {
-                "lobby_id": lobby_info["lobby_id"],
-                "status": "in_progress",
-                "player_count": 0,
-                "pot": 0,
-            }
 
-        result = await add_player_to_lobby(lobby_info["lobby_id"], request.alien_id)
+@app.post("/api/game/{lobby_id}/leave")
+async def leave_lobby(lobby_id: str, request: LeaveLobbyRequest, alien_id: str = Depends(verify_alien_token)):
+    try:
+        result = await remove_player_from_lobby(lobby_id, request.alien_id)
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
