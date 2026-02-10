@@ -11,7 +11,7 @@ export default function LobbyList({ lobbies, onSelectLobby, isJoining }: Props) 
   return (
     <div className="flex flex-col items-center min-h-[100dvh] px-4 py-6">
       <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent mb-1">
-        Fair Bingo
+        Bingo with Aliens
       </h1>
       <p className="text-gray-500 text-xs mb-6">
         Buy-in: {BUY_IN_AMOUNT.toLocaleString()} coins
