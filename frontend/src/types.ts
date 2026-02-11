@@ -1,3 +1,13 @@
+export interface LobbyInfo {
+  lobby_id: string;
+  name: string;
+  status: 'forming' | 'active';
+  player_count: number;
+  max_players: number;
+  pot: number;
+  buy_in_amount: number;
+}
+
 export interface Player {
   alien_id: string;
   numbers: number[];

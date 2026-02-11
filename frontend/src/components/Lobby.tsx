@@ -4,9 +4,8 @@ import type { GameStatus } from '../types';
 
 interface Props {
   gameState: GameStatus | null;
-  onJoin: () => void;
   onSubmitGrid: (grid: number[][]) => void;
-  isJoining: boolean;
+  onBack: () => void;
   isSubmitting: boolean;
   hasSubmitted: boolean;
   alienId: string | null;
@@ -111,9 +110,8 @@ function CountdownTimer({ deadline }: { deadline: string }) {
 
 export default function Lobby({
   gameState,
-  onJoin,
   onSubmitGrid,
-  isJoining,
+  onBack,
   isSubmitting,
   hasSubmitted,
   alienId,
@@ -143,35 +141,36 @@ export default function Lobby({
 
   return (
     <div className="flex flex-col items-center min-h-[100dvh] px-4 py-6">
+      {/* Back button — only while forming */}
+      {isForming && !hasSubmitted && (
+        <button
+          onClick={onBack}
+          className="self-start mb-4 text-gray-400 text-sm font-medium active:text-white transition-colors touch-manipulation"
+        >
+          &larr; Back
+        </button>
+      )}
+
       {/* Title */}
       <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent mb-1">
-        Fair Bingo
+        Bingo with Aliens
       </h1>
       <p className="text-gray-500 text-xs mb-2">
         Buy-in: {BUY_IN_AMOUNT.toLocaleString()} coins
       </p>
+
+      {/* Loading state while gameState hasn't loaded yet */}
+      {!hasJoined && (
+        <div className="flex flex-col items-center gap-4 mt-8">
+          <p className="text-gray-400 text-sm">Loading lobby...</p>
+        </div>
+      )}
 
       {/* Game in progress banner */}
       {isInProgress && (
         <div className="w-full max-w-sm bg-yellow-900/40 border border-yellow-700/50 rounded-xl px-4 py-3 mb-4 text-center">
           <p className="text-yellow-300 font-medium text-sm">Game in progress</p>
           <p className="text-yellow-500/70 text-xs mt-1">Waiting for next round...</p>
-        </div>
-      )}
-
-      {/* Join button (pre-join state) */}
-      {!hasJoined && (
-        <div className="flex flex-col items-center gap-4 mt-8">
-          <p className="text-gray-400 text-sm text-center max-w-[260px] leading-relaxed">
-            Join the lobby, pick your 9 numbers on the 3x3 grid, and compete for the pot!
-          </p>
-          <button
-            onClick={onJoin}
-            disabled={isJoining}
-            className="w-64 py-4 bg-blue-600 active:bg-blue-700 disabled:opacity-50 rounded-2xl font-bold text-xl transition-all active:scale-[0.98] touch-manipulation"
-          >
-            {isJoining ? 'Joining...' : 'Join Game'}
-          </button>
         </div>
       )}
 
@@ -199,7 +198,7 @@ export default function Lobby({
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className={`text-sm font-mono truncate ${p.alien_id === alienId ? 'text-blue-400' : 'text-gray-300'}`}>
-                      {p.alien_id === alienId ? 'You' : p.alien_id.slice(0, 12)}
+                      {p.alien_id === alienId ? 'You' : p.alien_id}
                     </span>
                     <span className="text-yellow-500/80 text-[10px] font-medium shrink-0">
                       {BUY_IN_AMOUNT.toLocaleString()}
