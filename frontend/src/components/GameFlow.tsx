@@ -44,7 +44,7 @@ export default function GameFlow() {
     }
   }, [gameState, phase, overlay]);
 
-  if (gameState) {
+  if (gameState && lobbyId) {
     syncPhaseFromServer();
   }
 
