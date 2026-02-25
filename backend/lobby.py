@@ -112,6 +112,8 @@ async def list_lobbies() -> list:
             "pot": int(lobby.get("pot", 0)),
             "buy_in_amount": int(lobby.get("buy_in_amount", BUY_IN_AMOUNT)),
         })
+    # Self-heal: ensure an empty lobby always exists for new players
+    await ensure_empty_lobby_exists()
     return lobbies
 
 
