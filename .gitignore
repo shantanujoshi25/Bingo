@@ -4,3 +4,4 @@ dump.rdb
 *.png
 .DS_Store
 .claude/
+phases/
