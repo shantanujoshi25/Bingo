@@ -55,6 +55,10 @@ App runs at `http://localhost:5173`. Frontend proxies `/api` requests to the bac
 - `REDIS_URL` — Redis connection string (defaults to `redis://localhost:6379`)
 - `VITE_PROVIDER_ADDRESS` — Alien provider address from the dev portal
 
+## Deployment
+
+Hosted on Railway with auto-deploy on push. The Dockerfile builds the frontend, copies the static files into the backend, and FastAPI serves everything. Redis is provisioned as a Railway service.
+
 ## How it works
 
 1. Browse open lobbies and join one (3,500 coin buy-in)
