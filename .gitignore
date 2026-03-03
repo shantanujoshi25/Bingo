@@ -3,3 +3,5 @@ __pycache__/
 dump.rdb
 *.png
 .DS_Store
+.claude/
+phases/
